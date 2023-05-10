@@ -107,3 +107,12 @@ module.exports.otp_verification = {
     }
 }
 
+module.exports.reset_password = {
+    controller: async (req, res) => {
+        const temp = await otpStore.findOne({ email: req.body.email, otp: req.body.otp })
+        if (temp) {
+            const updateData = await demoSchema.findOneAndUpdate({ email: req.body.email }, { password: req.body.paswword }, { new: true })
+            res.send(updateData)
+        }
+    }
+}
