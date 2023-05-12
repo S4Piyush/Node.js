@@ -17,8 +17,12 @@ const adminSchema = new mongoose.Schema({
     contactNo: {
         type: Number,
         required: true
-    },
 
+    },
+    isDelete: {
+        type: Boolean,
+        default: false
+    }
 })
 
 

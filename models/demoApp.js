@@ -12,6 +12,10 @@ const demoAppSchema = new mongoose.Schema({
     password: {
         type: String,
         require: true
+    },
+    isDelete: {
+        type: Boolean,
+        default: false
     }
 })
 

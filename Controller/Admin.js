@@ -25,7 +25,7 @@ module.exports.addSinUp = {
                 }
             }
         } catch (error) {
-            console.log('error🎄', error)
+            console.log('error', error)
             return res.status(500).send("somting wrong")
         }
 
@@ -44,7 +44,7 @@ module.exports.addLogin = {
                     email: user.email,
                     password: user.password,
                 }
-                return res.status(200).send({ userold, token: token, Some: "Login Successfully!" })
+                return res.status(200).send({ userold, token: token, message: "Login Successfully!" })
             }
             return res.status(400).send("Wrong Password!")
 
@@ -75,6 +75,7 @@ module.exports.forgetPassword = {
                 to: email.email,
                 subject: "Forgot password",
                 html: `Reset Password OTP : ${otpCode}`,
+
             }
             transporter.sendMail(mailOptions, function (error, info) {
                 if (error) {
@@ -86,9 +87,10 @@ module.exports.forgetPassword = {
             const otp = new otpStore()
             otp.email = mailOptions.to,
                 otp.otp = otpCode
+            otp.createdate = new Date()
             otp.save()
             delete mailOptions.html
-            return res.status(200).send(mailOptions)
+            return res.status(200).send("Otp send to email")
 
         } else {
             return res.status(500).send("User doesnt exits!")
@@ -100,7 +102,11 @@ module.exports.otp_verification = {
     controller: async (req, res) => {
         const verification = await otpStore.findOne({ email: req.body.email, otp: req.body.otp })
         if (verification) {
-            return res.status(200).send("otp Verification")
+            if (verification.createdate >= new Date(new Date(new Date().setMinutes(new Date().getMinutes() - 10)))) {
+                return res.status(200).send("otp Verification")
+            } else {
+                return res.send("otp Expire")
+            }
         } else {
             return res.status(400).send("invalidOTP")
         }
@@ -113,6 +119,20 @@ module.exports.reset_password = {
         if (temp) {
             const updateData = await demoSchema.findOneAndUpdate({ email: req.body.email }, { password: req.body.paswword }, { new: true })
             res.send(updateData)
+        } else {
+            return res.send("invalid Otp or email")
+        }
+    }
+}
+
+
+module.exports.delete_user = {
+    controller: async (req, res) => {
+        const deleteUser = await demoSchema.findOneAndUpdate({ _id: req.query.id, isDelete: false }, { isDelete: true }, { new: true })
+        if (deleteUser) {
+            return res.send(deleteUser)
+        } else {
+            return res.send("user already delete")
         }
     }
 }
