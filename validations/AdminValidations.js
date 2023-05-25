@@ -5,6 +5,8 @@ const addSinUpValidation = async (req, res, next) => {
         userName: Joi.string().required().error(new Error('userName is required!')),
         email: Joi.string().required().error(new Error('email is required!')),
         password: Joi.string().required().error(new Error('password is required!')),
+
+
     })
     const { error } = schema.validate(req.body)
     if (error) {

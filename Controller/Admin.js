@@ -7,6 +7,7 @@ const nodemailer = require('nodemailer')
 
 module.exports.addSinUp = {
     controller: async (req, res) => {
+
         try {
             const alreadyExist = await demoSchema.find({ email: req.body.email })
             if (alreadyExist && alreadyExist.length) {
@@ -16,7 +17,8 @@ module.exports.addSinUp = {
                 userSinupData.email = req.body.email.toLowerCase(),
                     userSinupData.userName = req.body.userName,
                     userSinupData.password = req.body.password,
-                    userSinupData.save()
+                    userSinupData.additionalInfo = req.body.additionalInfo
+                userSinupData.save()
                 if (userSinupData) {
                     const token = jwttokon(userSinupData);
                     res.send({ userSinupData, tokon: token })
@@ -26,7 +28,7 @@ module.exports.addSinUp = {
             }
         } catch (error) {
             console.log('error', error)
-            return res.status(500).send("somting wrong")
+            return res.status(500).send("somting wr ong")
         }
 
     }
@@ -40,7 +42,6 @@ module.exports.addLogin = {
             if (req.body.password === user.password) {
                 const token = jwttokon(user);
                 const userold = {
-                    userName: user.userName,
                     email: user.email,
                     password: user.password,
                 }
@@ -56,7 +57,7 @@ module.exports.addLogin = {
 
 module.exports.forgetPassword = {
     controller: async (req, res) => {
-        const verifyemail = req.body.email.toLowerCase()
+        const verifyemail = req.body.email
         const email = await demoSchema.findOne({ email: verifyemail })
         if (email) {
             const otpCode = Math.floor((Math.random() * 10000) + 1);
@@ -67,7 +68,7 @@ module.exports.forgetPassword = {
                 requireTLS: true,
                 auth: {
                     user: "piyushramani.7seasol@gmail.com",
-                    pass: "hezdfqtmupctzydx"
+                    pass: "yqfjbeqxaroibuid"
                 }
             })
             const mailOptions = {
@@ -90,7 +91,7 @@ module.exports.forgetPassword = {
             otp.createdate = new Date()
             otp.save()
             delete mailOptions.html
-            return res.status(200).send("Otp send to email")
+            return res.status(200).send(otp)
 
         } else {
             return res.status(500).send("User doesnt exits!")
@@ -101,6 +102,7 @@ module.exports.forgetPassword = {
 module.exports.otp_verification = {
     controller: async (req, res) => {
         const verification = await otpStore.findOne({ email: req.body.email, otp: req.body.otp })
+        console.log('verification', verification)
         if (verification) {
             if (verification.createdate >= new Date(new Date(new Date().setMinutes(new Date().getMinutes() - 10)))) {
                 return res.status(200).send("otp Verification")
@@ -115,9 +117,10 @@ module.exports.otp_verification = {
 
 module.exports.reset_password = {
     controller: async (req, res) => {
-        const temp = await otpStore.findOne({ email: req.body.email, otp: req.body.otp })
+        const temp = await otpStore.findOne({ email: req.body.email })
+        console.log('temp', temp, req.body.email)
         if (temp) {
-            const updateData = await demoSchema.findOneAndUpdate({ email: req.body.email }, { password: req.body.paswword }, { new: true })
+            const updateData = await demoSchema.findOneAndUpdate({ email: req.body.email }, { password: req.body.password }, { new: true })
             res.send(updateData)
         } else {
             return res.send("invalid Otp or email")

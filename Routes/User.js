@@ -15,7 +15,8 @@ router.post('/get_User', (req, res) => {
         } else {
             return res.status(400).send("bad_reouest")
         }
-    } catch {
+    } catch (error) {
+        console.log('error🎈', error)
         return res.status(500).send("Somethig went wrong")
     }
 })
